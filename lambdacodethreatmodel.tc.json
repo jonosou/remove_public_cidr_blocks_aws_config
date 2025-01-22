@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "applicationInfo": {
+    "name": "AWS Config Lambda Security Group Unrestricted Access Removal",
+    "description": "An AWS security control that automatically detects and removes public access (0.0.0.0/0) to SSH (22) and RDP (3389) ports in EC2 security groups. The system sends notifications via SNS upon changes. "
+  },
+  "architecture": {
+    "image": "",
+    "description": "AWS Config Rule: Monitors security group changes\n\nLambda Function: Processes and remediates violations\n\nSecurity Groups: Target resources being evaluated\n\nSNS Topic: Handles notifications\n\nAdministrator: Receives alerts"
+  },
+  "dataflow": {
+    "image": "",
+    "description": "Security group change detected\n\nConfig rule evaluates change\n\nLambda processes rule check\n\nDecision on compliance\n\nRemediation if needed\n\nNotification sent\n\nStatus updated"
+  },
+  "assumptions": [
+    {
+      "id": "7c81c455-58ec-435d-971b-dfd5584429b8",
+      "numericId": 3,
+      "content": "The AWS Config rule trigger rate and Lambda concurrent execution limits are sufficient to handle the expected legitimate volume of security group changes in the environment",
+      "displayOrder": 3
+    },
+    {
+      "id": "9e2a4f00-f65a-4055-ae16-f0bd72952f67",
+      "numericId": 2,
+      "content": "All code changes to the Lambda function go through the existing deployment pipeline",
+      "displayOrder": 2
+    },
+    {
+      "id": "80bae5eb-3927-4e46-9cfd-35b68fc14e03",
+      "numericId": 1,
+      "content": "The AWS Lambda function has permissions to interact with AWS Config rules, and these permissions cannot be reduced without impacting the required functionality",
+      "displayOrder": 1
+    }
+  ],
+  "mitigations": [
+    {
+      "id": "84f8d230-5eec-4b7c-b719-77c86062b56c",
+      "numericId": 3,
+      "status": "mitigationResolved",
+      "content": "Implement rate limiting and concurrent execution limits on the Lambda function, and configure exponential backoff retry logic for AWS API calls to handle throttling gracefully",
+      "displayOrder": 3
+    },
+    {
+      "id": "c58243bb-c9e2-445c-81d3-c59654a5fcc3",
+      "numericId": 2,
+      "status": "mitigationResolved",
+      "content": "Implement strict IAM policies limiting who can modify Lambda code/configuration using the principle of least privilege",
+      "displayOrder": 2
+    },
+    {
+      "id": "c91c1ded-e07c-4d92-8703-ea432f143c1d",
+      "numericId": 1,
+      "status": "mitigationResolved",
+      "content": "Use version control and implement branch protection rules requiring signed commits",
+      "displayOrder": 1
+    }
+  ],
+  "assumptionLinks": [
+    {
+      "type": "Threat",
+      "linkedId": "bb7208d6-9ae0-4a4d-8092-f05b3a36e72b",
+      "assumptionId": "80bae5eb-3927-4e46-9cfd-35b68fc14e03"
+    },
+    {
+      "type": "Threat",
+      "linkedId": "bb7208d6-9ae0-4a4d-8092-f05b3a36e72b",
+      "assumptionId": "9e2a4f00-f65a-4055-ae16-f0bd72952f67"
+    },
+    {
+      "type": "Threat",
+      "linkedId": "b82efc49-3349-45ea-ae60-566d87b33efe",
+      "assumptionId": "7c81c455-58ec-435d-971b-dfd5584429b8"
+    }
+  ],
+  "mitigationLinks": [
+    {
+      "linkedId": "bb7208d6-9ae0-4a4d-8092-f05b3a36e72b",
+      "mitigationId": "c58243bb-c9e2-445c-81d3-c59654a5fcc3"
+    },
+    {
+      "linkedId": "bb7208d6-9ae0-4a4d-8092-f05b3a36e72b",
+      "mitigationId": "c91c1ded-e07c-4d92-8703-ea432f143c1d"
+    },
+    {
+      "linkedId": "b82efc49-3349-45ea-ae60-566d87b33efe",
+      "mitigationId": "84f8d230-5eec-4b7c-b719-77c86062b56c"
+    }
+  ],
+  "threats": [
+    {
+      "id": "b82efc49-3349-45ea-ae60-566d87b33efe",
+      "numericId": 2,
+      "displayOrder": 2,
+      "status": "threatResolved",
+      "statement": "An attacker who can trigger excessive security group evaluations can cause API throttling, which leads to impacting secuirty group compliance checks, negatively impacting unrestricted ports from being removed",
+      "threatSource": "attacker",
+      "prerequisites": "who can trigger excessive security group evaluations",
+      "threatAction": "cause API throttling",
+      "threatImpact": "impacting secuirty group compliance checks",
+      "impactedAssets": [
+        "unrestricted ports from being removed"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Low"
+        }
+      ]
+    },
+    {
+      "id": "bb7208d6-9ae0-4a4d-8092-f05b3a36e72b",
+      "numericId": 1,
+      "displayOrder": 1,
+      "status": "threatResolved",
+      "statement": "A threat actor who has access to modify the lambda code can tamper with the code and modify for intrusive activities, which leads to the actor being able to do anything the AWS Lambda function can do, negatively impacting AWS config rule",
+      "threatSource": "threat actor",
+      "prerequisites": "who has access to modify the lambda code",
+      "threatAction": "tamper with the code and modify for intrusive activities",
+      "threatImpact": "the actor being able to do anything the AWS Lambda function can do",
+      "impactedAssets": [
+        "AWS config rule"
+      ],
+      "metadata": [
+        {
+          "key": "Priority",
+          "value": "Medium"
+        }
+      ]
+    }
+  ]
+}
