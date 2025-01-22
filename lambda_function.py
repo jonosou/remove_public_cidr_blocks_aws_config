@@ -4,6 +4,8 @@ import json
 
 # Initialize the SNS client
 sns = boto3.client('sns')
+# Initialize the EC2 client
+ec2 = boto3.client("ec2")
 
 APPLICABLE_RESOURCES = ["AWS::EC2::SecurityGroup"]
 # these security groups will not have their public accessible CIDR blocks removed
@@ -28,7 +30,7 @@ def evaluate_compliance(configuration_item):
         }
 
     group_id = configuration_item["configuration"]["groupId"]
-    client = boto3.client("ec2")
+    client = ec2
 
     try:
         response = client.describe_security_groups(GroupIds=[group_id])
@@ -86,9 +88,7 @@ def evaluate_compliance(configuration_item):
     }
 
 def lambda_handler(event, context):
-    print(event)
     print("Lambda function invoked")
-    print("Event:", json.dumps(event, indent=2))
 
     invoking_event = json.loads(event['invokingEvent'])
     configuration_item = invoking_event["configurationItem"]
